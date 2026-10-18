@@ -2,3 +2,5 @@ streamlit
 crewai
 crewai-tools
 google-genai
+langchain-community
+duckduckgo-search
