@@ -4,7 +4,7 @@ from crewai import Agent, Crew, Process, Task, LLM
 from crewai.tools import tool
 from langchain_community.tools import DuckDuckGoSearchRun
 
-# Definimos la herramienta de búsqueda de forma nativa e inmune a errores de importación
+# Definimos la herramienta de búsqueda de forma nativa e inmune a errores
 @tool("Buscador DuckDuckGo")
 def buscar_en_web(query: str) -> str:
     """Busca en la web usando DuckDuckGo para obtener información actualizada, opiniones y noticias."""
@@ -82,11 +82,10 @@ if btn_ejecutar:
         
         with st.spinner("🤖 Los agentes están investigando en la web y generando el análisis... esto tomará unos segundos."):
             try:
-                # Configuración del LLM con el proveedor de Google
+                # Configuración estándar del LLM compatible con CrewAI y Google GenAI
                 llm = LLM(
                     model="gemini/gemini-1.5-flash",
-                    api_key=gemini_api_key.strip(),
-                    provider="google"
+                    api_key=gemini_api_key.strip()
                 )
 
                 # 1. Agente Investigador / Scraper
