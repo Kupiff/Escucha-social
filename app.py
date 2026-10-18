@@ -1,9 +1,9 @@
 import os
 import streamlit as st
 from crewai import Agent, Crew, Process, Task, LLM
-from langchain_community.tools import DuckDuckGoSearchRun
+from crewai_tools import DuckDuckGoSearchTool
 
-# Configuración de página de Streamlit
+# Configuración de la página en Streamlit
 st.set_page_config(
     page_title="Agente de Escucha Social AI",
     page_icon="📡",
@@ -28,13 +28,21 @@ with col1:
         help="Introduce tu clave de API personal de Google AI Studio."
     )
     
+    # Enlace de ayuda para obtener la API Key
+    st.markdown(
+        "🔑 **¿No tienes una API Key?** Obtenla de forma rápida y gratuita en "
+        "[Google AI Studio](https://aistudio.google.com/app/apikey)."
+    )
+    
+    st.divider()
+
     tema_busqueda = st.text_area(
         "Tema, Marca o Producto a Analizar",
         placeholder="Ejemplo: Tesla Cybercab, Lanzamiento iPhone 16, Inteligencia Artificial en Educación...",
         height=100
     )
 
-    # Campo de selección del Enfoque del Análisis
+    # Selector de Enfoque del Análisis
     enfoque_analisis = st.selectbox(
         "Enfoque del Análisis",
         options=[
@@ -61,15 +69,15 @@ if btn_ejecutar:
     elif not tema_busqueda or not tema_busqueda.strip():
         st.error("⚠️ Error: Por favor, introduce un tema o marca para analizar.")
     else:
-        # Configurar la API Key
+        # Configurar la variable de entorno
         os.environ["GEMINI_API_KEY"] = gemini_api_key.strip()
         
         with st.spinner("🤖 Los agentes están investigando en la web y generando el análisis... esto tomará unos segundos."):
             try:
-                # Inicializar la herramienta de búsqueda
-                search_tool = DuckDuckGoSearchRun()
+                # Herramienta oficial de búsqueda de CrewAI
+                search_tool = DuckDuckGoSearchTool()
 
-                # Configurar el Modelo Gemini
+                # Configuración del LLM con el proveedor de Google
                 llm = LLM(
                     model="gemini/gemini-1.5-flash",
                     api_key=gemini_api_key.strip(),
@@ -80,7 +88,7 @@ if btn_ejecutar:
                 investigador = Agent(
                     role="Investigador de Escucha Social",
                     goal=f"Buscar opiniones, conversaciones y tendencias recientes sobre '{tema_busqueda}', priorizando la perspectiva de '{enfoque_analisis}'.",
-                    backstory="Eres un analista experto en datos web y redes sociales. Tu trabajo es encontrar información relevante y reciente sobre marcas, productos o temas específicos con un ojo crítico.",
+                    backstory="Eres un analista experto en datos web y redes sociales. Tu trabajo es encontrar información relevante y reciente sobre marcas, productos o temas específicos.",
                     tools=[search_tool],
                     llm=llm,
                     verbose=True,
@@ -91,7 +99,7 @@ if btn_ejecutar:
                 analista = Agent(
                     role="Analista Estratégico de Marcas",
                     goal=f"Sintetizar la información recolectada y generar un informe de escucha social enfocado en '{enfoque_analisis}'.",
-                    backstory="Especialista en inteligencia de mercado y reputación online. Transformas datos dispersos de la web en insights accionables, análisis de sentimiento y recomendaciones estratégicas alineadas al enfoque solicitado.",
+                    backstory="Especialista en inteligencia de mercado y reputación online. Transformas datos dispersos de la web en insights accionables, análisis de sentimiento y recomendaciones estratégicas.",
                     llm=llm,
                     verbose=True,
                     allow_delegation=False
