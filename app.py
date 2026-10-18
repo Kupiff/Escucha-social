@@ -69,10 +69,11 @@ if btn_ejecutar:
                 # Inicializar la herramienta de búsqueda
                 search_tool = DuckDuckGoSearchRun()
 
-                # Configurar el Modelo Gemini usando la integración LLM de CrewAI
+                # Configurar el Modelo Gemini
                 llm = LLM(
                     model="gemini/gemini-1.5-flash",
-                    api_key=gemini_api_key.strip()
+                    api_key=gemini_api_key.strip(),
+                    provider="google"
                 )
 
                 # 1. Agente Investigador / Scraper
