@@ -1,7 +1,15 @@
 import os
 import streamlit as st
 from crewai import Agent, Crew, Process, Task, LLM
-from crewai_tools import DuckDuckGoSearchTool
+from crewai.tools import tool
+from langchain_community.tools import DuckDuckGoSearchRun
+
+# Definimos la herramienta de búsqueda de forma nativa e inmune a errores de importación
+@tool("Buscador DuckDuckGo")
+def buscar_en_web(query: str) -> str:
+    """Busca en la web usando DuckDuckGo para obtener información actualizada, opiniones y noticias."""
+    search = DuckDuckGoSearchRun()
+    return search.run(query)
 
 # Configuración de la página en Streamlit
 st.set_page_config(
@@ -30,7 +38,7 @@ with col1:
     
     # Enlace de ayuda para obtener la API Key
     st.markdown(
-        "🔑 **¿No tienes una API Key?** Obtenla de forma rápida y gratuita en "
+        "🔑 **¿No tienes una API Key?** Consíguela de forma rápida y gratuita en "
         "[Google AI Studio](https://aistudio.google.com/app/apikey)."
     )
     
@@ -69,14 +77,11 @@ if btn_ejecutar:
     elif not tema_busqueda or not tema_busqueda.strip():
         st.error("⚠️ Error: Por favor, introduce un tema o marca para analizar.")
     else:
-        # Configurar la variable de entorno
+        # Configurar la variable de entorno para Gemini
         os.environ["GEMINI_API_KEY"] = gemini_api_key.strip()
         
         with st.spinner("🤖 Los agentes están investigando en la web y generando el análisis... esto tomará unos segundos."):
             try:
-                # Herramienta oficial de búsqueda de CrewAI
-                search_tool = DuckDuckGoSearchTool()
-
                 # Configuración del LLM con el proveedor de Google
                 llm = LLM(
                     model="gemini/gemini-1.5-flash",
@@ -89,7 +94,7 @@ if btn_ejecutar:
                     role="Investigador de Escucha Social",
                     goal=f"Buscar opiniones, conversaciones y tendencias recientes sobre '{tema_busqueda}', priorizando la perspectiva de '{enfoque_analisis}'.",
                     backstory="Eres un analista experto en datos web y redes sociales. Tu trabajo es encontrar información relevante y reciente sobre marcas, productos o temas específicos.",
-                    tools=[search_tool],
+                    tools=[buscar_en_web],
                     llm=llm,
                     verbose=True,
                     allow_delegation=False
