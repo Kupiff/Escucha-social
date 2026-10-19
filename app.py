@@ -64,7 +64,7 @@ with col1:
         help="Selecciona la perspectiva principal desde la que los agentes analizarán la información."
     )
 
-    st.subheader("🧩 Módulos a Ejecutar")
+    st.subheader("🧩 Agentes a ejecutar")
     
     col_mod1, col_mod2 = st.columns(2)
     with col_mod1:
@@ -78,7 +78,7 @@ with col1:
 
     st.divider()
     st.markdown(
-        "🌐 **Descubre más proyectos y herramientas en mi web:** [rkweb.es](https://rkweb.es)"
+        "🌐 **Mas cosas en mi web:** [rkweb.es](https://rkweb.es)"
     )
 
 with col2:
