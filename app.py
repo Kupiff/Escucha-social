@@ -76,6 +76,11 @@ with col1:
 
     btn_ejecutar = st.button("🚀 Iniciar Escucha Social", type="primary", use_container_width=True)
 
+    st.divider()
+    st.markdown(
+        "🌐 **Descubre más proyectos y herramientas en mi web:** [rkweb.es](https://rkweb.es)"
+    )
+
 with col2:
     st.subheader("Reporte Final de Análisis")
     output_container = st.empty()
