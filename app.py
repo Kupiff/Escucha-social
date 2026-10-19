@@ -4,7 +4,7 @@ from crewai import Agent, Crew, Process, Task, LLM
 from crewai.tools import tool
 from langchain_community.tools import DuckDuckGoSearchRun
 
-# Definimos la herramienta de búsqueda de forma nativa e inmune a errores
+# Buscador web nativo envuelto como herramienta de CrewAI
 @tool("Buscador DuckDuckGo")
 def buscar_en_web(query: str) -> str:
     """Busca en la web usando DuckDuckGo para obtener información actualizada, opiniones y noticias."""
@@ -47,7 +47,7 @@ with col1:
     tema_busqueda = st.text_area(
         "Tema, Marca o Producto a Analizar",
         placeholder="Ejemplo: Tesla Cybercab, Lanzamiento iPhone 16, Inteligencia Artificial en Educación...",
-        height=100
+        height=90
     )
 
     # Selector de Enfoque del Análisis
@@ -63,7 +63,17 @@ with col1:
         index=0,
         help="Selecciona la perspectiva principal desde la que los agentes analizarán la información."
     )
+
+    st.subheader("🧩 Módulos a Ejecutar")
     
+    col_mod1, col_mod2 = st.columns(2)
+    with col_mod1:
+        mod_monitoreo = st.checkbox("🔍 Monitoreo y Rastreo Web", value=True)
+        mod_sentimiento = st.checkbox("📊 Análisis de Sentimiento y Reputación", value=True)
+    with col_mod2:
+        mod_estrategia = st.checkbox("💬 Estrategia y Plantillas de Respuesta", value=True)
+        mod_resumen = st.checkbox("📋 Resumen Ejecutivo", value=True)
+
     btn_ejecutar = st.button("🚀 Iniciar Escucha Social", type="primary", use_container_width=True)
 
 with col2:
@@ -72,68 +82,91 @@ with col2:
     output_container.info("*El informe generado por el equipo de agentes aparecerá aquí...*")
 
 if btn_ejecutar:
+    modulos_seleccionados = []
+    if mod_monitoreo: modulos_seleccionados.append("Monitoreo y Rastreo Web")
+    if mod_sentimiento: modulos_seleccionados.append("Análisis de Sentimiento y Reputación")
+    if mod_estrategia: modulos_seleccionados.append("Estrategia y Plantillas de Respuesta")
+    if mod_resumen: modulos_seleccionados.append("Resumen Ejecutivo")
+
     if not gemini_api_key or not gemini_api_key.strip():
         st.error("⚠️ Error: Por favor, introduce tu API Key de Google Gemini.")
     elif not tema_busqueda or not tema_busqueda.strip():
         st.error("⚠️ Error: Por favor, introduce un tema o marca para analizar.")
+    elif not modulos_seleccionados:
+        st.error("⚠️ Error: Por favor, selecciona al menos un módulo a ejecutar.")
     else:
         # Configurar la variable de entorno para Gemini
         os.environ["GEMINI_API_KEY"] = gemini_api_key.strip()
         
-        with st.spinner("🤖 Los agentes están investigando en la web y generando el análisis... esto tomará unos segundos."):
+        with st.spinner("🤖 Los agentes están procesando los módulos seleccionados... esto tomará unos segundos."):
             try:
-                # Configuración estándar del LLM compatible con CrewAI y Google GenAI
+                # Configuración del modelo por defecto
                 llm = LLM(
-                    model="gemini/gemini-3.8-flash",
+                    model="gemini/gemini-2.0-flash",
                     api_key=gemini_api_key.strip()
                 )
 
-                # 1. Agente Investigador / Scraper
+                # Definición de Agentes
                 investigador = Agent(
                     role="Investigador de Escucha Social",
-                    goal=f"Buscar opiniones, conversaciones y tendencias recientes sobre '{tema_busqueda}', priorizando la perspectiva de '{enfoque_analisis}'.",
-                    backstory="Eres un analista experto en datos web y redes sociales. Tu trabajo es encontrar información relevante y reciente sobre marcas, productos o temas específicos.",
+                    goal=f"Rastrear la web y recopilar menciones, opiniones y tendencias sobre '{tema_busqueda}' enfocado en '{enfoque_analisis}'.",
+                    backstory="Especialista en rastreo de medios digitales, redes sociales y foros comunitarios.",
                     tools=[buscar_en_web],
                     llm=llm,
                     verbose=True,
                     allow_delegation=False
                 )
 
-                # 2. Agente Analista de Sentimiento y Tendencias
                 analista = Agent(
-                    role="Analista Estratégico de Marcas",
-                    goal=f"Sintetizar la información recolectada y generar un informe de escucha social enfocado en '{enfoque_analisis}'.",
-                    backstory="Especialista en inteligencia de mercado y reputación online. Transformas datos dispersos de la web en insights accionables, análisis de sentimiento y recomendaciones estratégicas.",
+                    role="Analista Estratégico y de Reputación",
+                    goal=f"Procesar los hallazgos sobre '{tema_busqueda}' y generar informes detallados para los módulos seleccionados.",
+                    backstory="Especialista en inteligencia de mercados, métricas de sentimiento, comunicación de crisis y síntesis ejecutiva.",
                     llm=llm,
                     verbose=True,
                     allow_delegation=False
                 )
 
-                # Tarea 1: Búsqueda de información
+                # Construcción dinámica de Tareas según los módulos activados
+                tareas = []
+
+                # Tarea base de Búsqueda (siempre necesaria si hay módulos activos)
                 tarea_investigacion = Task(
-                    description=f"Realiza una búsqueda profunda en la web sobre '{tema_busqueda}'. Recopila opiniones, menciones clave y noticias recientes, prestando especial atención a elementos relacionados con: {enfoque_analisis}.",
-                    expected_output="Un resumen detallado con los hallazgos principales, datos clave y citas relevantes encontradas en la web.",
+                    description=f"Realiza búsquedas web sobre '{tema_busqueda}'. Extrae noticias recientes, opiniones de usuarios y debates clave bajo el enfoque de '{enfoque_analisis}'.",
+                    expected_output="Recopilación estructurada con hallazgos clave, fuentes y citas de usuarios/medios.",
                     agent=investigador
                 )
+                tareas.append(tarea_investigacion)
 
-                # Tarea 2: Análisis y reporte
+                instrucciones_reporte = []
+                if mod_monitoreo:
+                    instrucciones_reporte.append("1. **🔍 Monitoreo y Rastreo Web**: Detalla las principales conversaciones, fuentes consultadas y volumen estimado de menciones.")
+                if mod_sentimiento:
+                    instrucciones_reporte.append("2. **📊 Análisis de Sentimiento y Reputación**: Clasifica el tono general (Positivo, Neutro, Negativo) identificando los principales impulsores o detracciones de la marca.")
+                if mod_estrategia:
+                    instrucciones_reporte.append("3. **💬 Estrategia y Plantillas de Respuesta**: Proporciona recomendaciones tácticas de acción y al menos 2 plantillas de respuesta recomendadas ante comentarios críticos o frecuentes.")
+                if mod_resumen:
+                    instrucciones_reporte.append("4. **📋 Resumen Ejecutivo**: Sintetiza en un párrafo de alto nivel las conclusiones clave para la toma de decisiones rápidas.")
+
+                guion_reporte = "\n".join(instrucciones_reporte)
+
                 tarea_analisis = Task(
-                    description=f"Analiza los resultados obtenidos sobre '{tema_busqueda}' desde el enfoque de '{enfoque_analisis}'. Clasifica el sentimiento general (Positivo, Neutro, Negativo), identifica temas recurrentes y ofrece recomendaciones estratégicas directamente orientadas a este enfoque.",
-                    expected_output=f"Un informe estructurado en formato Markdown con: 1. Resumen Ejecutivo (Perspectiva: {enfoque_analisis}), 2. Análisis de Sentimiento, 3. Temas Clave / Tendencias, 4. Recomendaciones Estratégicas Específicas.",
+                    description=f"Con la información recopilada sobre '{tema_busqueda}', genera un informe estructurado que incluya ÚNICAMENTE las siguientes secciones solicitadas por el usuario:\n{guion_reporte}",
+                    expected_output="Informe final en Markdown que contenga exactamente las secciones solicitadas con alta calidad de detalle.",
                     agent=analista
                 )
+                tareas.append(tarea_analisis)
 
-                # Crear y ejecutar la Crew
+                # Ejecutar CrewAI
                 equipo = Crew(
                     agents=[investigador, analista],
-                    tasks=[tarea_investigacion, tarea_analisis],
+                    tasks=tareas,
                     process=Process.sequential,
                     verbose=True
                 )
 
                 resultado = equipo.kickoff()
                 
-                # Mostrar el resultado final en la interfaz
+                # Mostrar resultado final en pantalla
                 output_container.markdown(str(resultado))
                 st.success("¡Análisis completado con éxito!")
 
