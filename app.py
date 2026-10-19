@@ -102,7 +102,7 @@ if btn_ejecutar:
             try:
                 # Configuración del modelo por defecto
                 llm = LLM(
-                    model="gemini/gemini-2.0-flash",
+                    model="gemini/gemini-3.8-flash",
                     api_key=gemini_api_key.strip()
                 )
 
