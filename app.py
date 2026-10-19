@@ -18,10 +18,10 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📡 Sistema de Agentes de IA - Escucha Social")
+st.title("Equipo de Agentes de IA - Escucha Social")
 st.markdown(
     """
-    Analiza marcas, tendencias u opiniones en tiempo real utilizando agentes autónomos con **CrewAI** y **Google Gemini**.
+    Analisis de marcas, tendencias u opiniones con agentes autónomos.
     """
 )
 
