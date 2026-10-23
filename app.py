@@ -29,13 +29,32 @@ st.markdown(
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    gemini_api_key = st.text_input(
-        "Llave de API de Google Gemini (API Key)",
+    gemini_api_key_usuario = st.text_input(
+        "Llave de API de Google Gemini (Opcional)",
         type="password",
-        placeholder="AIzaSy...",
-        help="Introduce tu clave de API personal de Google AI Studio."
+        placeholder="AIzaSy... (Déjalo vacío para usar la clave pública)",
+        help="Introduce tu clave de API personal o déjala vacía para usar la clave de demostración de la app."
     )
     
+    # Lógica y avisos sobre la clave maestra / pública
+    api_key_a_usar = ""
+    if gemini_api_key_usuario and gemini_api_key_usuario.strip():
+        api_key_a_usar = gemini_api_key_usuario.strip()
+        st.success("✔️ Usando tu clave de API personal.")
+    else:
+        # Intenta cargar la clave maestra desde los secretos de Streamlit Cloud
+        api_key_maestra = st.secrets.get("GEMINI_API_KEY", "")
+        if api_key_maestra:
+            api_key_a_usar = api_key_maestra
+            st.warning(
+                "⚠️ **Modo Demostración Activo:** Estás usando la clave pública de la aplicación. "
+                "Si hay muchos usuarios probándola al mismo tiempo, puede saturarse temporalmente por los límites de cuota gratuita. "
+                "Si lo prefieres, puedes introducir tu propia clave personal para evitar esperas."
+            )
+        else:
+            # Si no hay clave de usuario ni clave secreta configurada
+            api_key_a_usar = ""
+
     # Enlace de ayuda para obtener la API Key
     st.markdown(
         "🔑 **¿No tienes una API Key?** Consíguela de forma rápida y gratuita en "
@@ -93,22 +112,22 @@ if btn_ejecutar:
     if mod_estrategia: modulos_seleccionados.append("Estrategia y Plantillas de Respuesta")
     if mod_resumen: modulos_seleccionados.append("Resumen Ejecutivo")
 
-    if not gemini_api_key or not gemini_api_key.strip():
-        st.error("⚠️ Error: Por favor, introduce tu API Key de Google Gemini.")
+    if not api_key_a_usar or not api_key_a_usar.strip():
+        st.error("⚠️ Error: No hay ninguna API Key disponible. Por favor, introduce tu clave de Google Gemini.")
     elif not tema_busqueda or not tema_busqueda.strip():
         st.error("⚠️ Error: Por favor, introduce un tema o marca para analizar.")
     elif not modulos_seleccionados:
         st.error("⚠️ Error: Por favor, selecciona al menos un módulo a ejecutar.")
     else:
         # Configurar la variable de entorno para Gemini
-        os.environ["GEMINI_API_KEY"] = gemini_api_key.strip()
+        os.environ["GEMINI_API_KEY"] = api_key_a_usar.strip()
         
         with st.spinner("🤖 Los agentes están procesando los módulos seleccionados... esto tomará unos segundos."):
             try:
                 # Configuración del modelo por defecto
                 llm = LLM(
                     model="gemini/gemini-3.8-flash",
-                    api_key=gemini_api_key.strip()
+                    api_key=api_key_a_usar.strip()
                 )
 
                 # Definición de Agentes
