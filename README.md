@@ -35,6 +35,36 @@
 Si deseas clonar y ejecutar este proyecto en tu entorno local:
 
 1. **Clona el repositorio:**
-   ```bash
-   git clone [https://github.com/TU-USUARIO/escucha-social.git](https://github.com/TU-USUARIO/escucha-social.git)
+
+   git clone https://github.com/kupiff/escucha-social.git
    cd escucha-social
+
+3. Crea un entorno virtual e instálalo:
+
+    python -m venv venv
+    source venv/bin/activate  # En Windows: venv\Scripts\activate
+    pip install -r requirements.txt
+   
+4. Ejecuta la aplicación de Streamlit:
+
+    streamlit run app.py
+
+
+Dependencias (requirements.txt)
+
+Asegúrate de que tu archivo requirements.txt contenga lo siguiente para evitar errores de despliegue en la nube:
+
+streamlit
+crewai
+crewai-tools
+google-genai
+langchain-community
+duckduckgo-search
+
+Automatización Keep-Alive (GitHub Actions)
+
+Para evitar que Streamlit Cloud ponga a dormir la aplicación por inactividad, este repositorio incluye un flujo de trabajo en .github/workflows/keep-alive.yml que realiza pings periódicos automáticos.
+Conecta conmigo
+
+    Web personal: https://rkweb.es
+    LinkedIn: https://www.linkedin.com/in/francisco-cupini-75637983/
