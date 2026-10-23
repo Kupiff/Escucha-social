@@ -66,5 +66,5 @@ Automatización Keep-Alive (GitHub Actions)
 Para evitar que Streamlit Cloud ponga a dormir la aplicación por inactividad, este repositorio incluye un flujo de trabajo en .github/workflows/keep-alive.yml que realiza pings periódicos automáticos.
 Conecta conmigo
 
-    Web personal: https://rkweb.es
-    LinkedIn: https://www.linkedin.com/in/francisco-cupini-75637983/
+  Web personal: https://rkweb.es
+  LinkedIn: https://www.linkedin.com/in/francisco-cupini-75637983/
