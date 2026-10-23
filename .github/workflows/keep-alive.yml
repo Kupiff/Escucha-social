@@ -13,4 +13,4 @@ jobs:
       - name: Ping Streamlit App
         run: |
           # Reemplaza la URL con la dirección exacta de tu app en Streamlit Cloud
-          curl -I https://tu-aplicacion.streamlit.app/
+          curl -I https://escucha-social.streamlit.app/
